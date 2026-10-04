@@ -1,43 +1,67 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="pt-BR">
 
 <body>
 
-    <h2 id="titulo"></h2>
-    <button type="button" onclick="reloadApuracao()">Reload</button>
-    <ul id="apuracao"></ul>
+```
+<h2 id="titulo"></h2>
+<button type="button" onclick="reloadApuracao()">Reload</button>
+<ul id="apuracao"></ul>
 
-    <script>
-        function trataApuracao(jsonApuracao) {
-            const titulo = document.getElementById("titulo");
-            const apuracao = document.getElementById("apuracao");
-            apuracao.innerHTML = "";
-            
-            titulo.innerHTML = jsonApuracao.s.pst + "% das urnas apuradas";
+<script>
+    const URL_APURACAO =
+        "https://resultados.tse.jus.br/oficial/ele2026/6257/dados/br/br-c0001-e006257-u.json";
 
-            jsonApuracao.carg[0].agr.forEach(function (grupo) {
-                grupo.par.forEach(function (partido) {
-                    partido.cand.forEach(function (candidato) {
-                        const node = document.createElement("li");
-                        const textnode = document.createTextNode(
-                            candidato.nm + ": " + candidato.pvap + "%"
-                        );
-                        node.appendChild(textnode);
-                        apuracao.appendChild(node);
-                    });
+    function trataApuracao(jsonApuracao) {
+        const titulo = document.getElementById("titulo");
+        const apuracao = document.getElementById("apuracao");
+
+        apuracao.innerHTML = "";
+
+        titulo.innerHTML =
+            jsonApuracao.s.pst + "% das urnas apuradas";
+
+        jsonApuracao.carg[0].agr.forEach(function (grupo) {
+            grupo.par.forEach(function (partido) {
+                partido.cand.forEach(function (candidato) {
+
+                    const node = document.createElement("li");
+
+                    const textnode = document.createTextNode(
+                        candidato.nm + ": " + candidato.pvap + "%"
+                    );
+
+                    node.appendChild(textnode);
+                    apuracao.appendChild(node);
                 });
             });
-        }
+        });
+    }
 
-        function reloadApuracao() {
-            const xhttp = new XMLHttpRequest();
-            xhttp.onload = function () {
+    function reloadApuracao() {
+        const xhttp = new XMLHttpRequest();
+
+        xhttp.onload = function () {
+            if (this.status === 200) {
                 trataApuracao(JSON.parse(this.responseText));
-            };
-            xhttp.open("GET", "https://resultados.tse.jus.br/oficial/ele2024/619/dados/sp/sp71072-c0011-e000619-u.json");
-            xhttp.send();
-        }
-    </script>
+            } else {
+                console.error("Erro HTTP:", this.status);
+            }
+        };
+
+        xhttp.onerror = function () {
+            console.error("Erro ao acessar a API do TSE");
+        };
+
+        xhttp.open("GET", URL_APURACAO);
+        xhttp.send();
+    }
+
+    // Carrega automaticamente ao abrir
+    reloadApuracao();
+</script>
+```
 
 </body>
 
