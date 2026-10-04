@@ -1,11 +1,80 @@
 <!DOCTYPE html>
+<html lang="pt-BR">
 
-<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apuração TSE</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --card-bg: #ffffff;
+            --border-color: #888888;
+            --btn-bg: #f0f0f0;
+            --btn-text: #000000;
+            --green-color: green;
+            --red-color: red;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border-color: #444444;
+            --btn-bg: #2d2d2d;
+            --btn-text: #ffffff;
+            --green-color: #4caf50;
+            --red-color: #ff5252;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: sans-serif;
+            margin: 16px;
+        }
+
+        table {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+
+        td {
+            border-color: var(--border-color);
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .pos-top {
+            color: var(--green-color);
+        }
+
+        .pos-bottom {
+            color: var(--red-color);
+        }
+
+        .pos-normal {
+            color: var(--text-color);
+        }
+    </style>
+</head>
 
 <body>
 
-    <p>Próxima atualização em: <span id="contador">10</span>s</p>
-    <button type="button" onclick="reloadAll()">Reload</button>
+    <p>
+        Próxima atualização em: <span id="contador">10</span>s
+        &nbsp;
+        <button type="button" onclick="reloadAll()">Reload</button>
+        &nbsp;
+        <button type="button" id="theme-btn" onclick="toggleTheme()">Modo Escuro</button>
+    </p>
 
     <table border="1" cellpadding="8" cellspacing="0" width="100%">
         <tr>
@@ -35,6 +104,32 @@
     </table>
 
     <script>
+        function applyTheme(theme) {
+            document.documentElement.setAttribute("data-theme", theme);
+            const themeBtn = document.getElementById("theme-btn");
+            if (themeBtn) {
+                themeBtn.innerText = theme === "dark" ? "Modo Claro" : "Modo Escuro";
+            }
+            localStorage.setItem("theme", theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            applyTheme(newTheme);
+        }
+
+        (function initTheme() {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                applyTheme("dark");
+            } else {
+                applyTheme("light");
+            }
+        })();
+
         let timeLeft = 10;
 
         function trataApuracaoGenerica(jsonApuracao, tituloId, apuracaoId) {
@@ -69,11 +164,11 @@
                 node.appendChild(textnode);
 
                 if (index < 2) {
-                    node.style.color = "green";
+                    node.className = "pos-top";
                 } else if (index >= candidatos.length - 2) {
-                    node.style.color = "red";
+                    node.className = "pos-bottom";
                 } else {
-                    node.style.color = "black";
+                    node.className = "pos-normal";
                 }
 
                 apuracao.appendChild(node);
